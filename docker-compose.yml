@@ -1,0 +1,47 @@
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    profiles: ["local"]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-nutriadmin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-change-me-in-production}
+    volumes:
+      - mongo_data:/data/db
+    # Expose only if you need direct DB access from host:
+    # ports:
+    #   - "27017:27017"
+
+  server:
+    build: ./server
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      MONGODB_URI: ${MONGODB_URI:-mongodb+srv://aaaaaaaaaaasafafe_db_user:2XEXBzwwShe4hvP3@cluster0.on83xaq.mongodb.net/nutriplan}
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production-please-very-long-secret}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:8080}
+      TZ: ${TZ:-America/Sao_Paulo}
+      ADMIN_NAME: ${ADMIN_NAME:-Nutricionista}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@nutriplan.com}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Admin@123}
+      SEED_DEMO: ${SEED_DEMO:-true}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+    # depends_on mongo removed: using MongoDB Atlas by default
+    ports:
+      - "${SERVER_PORT:-5000}:5000"
+
+  client:
+    build:
+      context: ./client
+      args:
+        VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID:-}
+    restart: unless-stopped
+    depends_on:
+      - server
+    ports:
+      - "${CLIENT_PORT:-8080}:80"
+
+volumes:
+  mongo_data:

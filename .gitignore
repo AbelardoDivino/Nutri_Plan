@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+server/.env
+client/.env
+
+# Build outputs
+client/dist/
+server/dist/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+mongo_data/
