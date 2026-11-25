@@ -26,10 +26,16 @@ app.use(helmet({ contentSecurityPolicy: false }))
 app.use(express.json({ limit: '3mb' }))
 app.use(morgan('dev'))
 
-const origins = (process.env.CORS_ORIGIN || '').split(',').map((s) => s.trim()).filter(Boolean)
+const allowedOrigins = (process.env.CORS_ORIGIN || '').split(',').map((s) => s.trim()).filter(Boolean)
 app.use(
   cors({
-    origin: origins.length ? origins : true,
+    origin: (origin, cb) => {
+      if (!origin) return cb(null, true)
+      if (allowedOrigins.includes(origin)) return cb(null, true)
+      if (/\.vercel\.app$/i.test(origin)) return cb(null, true)
+      if (/^http:\/\/localhost:\d+$/i.test(origin)) return cb(null, true)
+      return cb(new Error('Not allowed by CORS'))
+    },
     credentials: true,
   }),
 )
